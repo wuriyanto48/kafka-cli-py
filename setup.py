@@ -10,7 +10,7 @@ long_description = (HERE / 'README.md').read_text(encoding='utf-8')
 
 setup(
     name='kafka-cli-py', 
-    version='1.0.6',
+    version='1.0.0',
     description='kafka cli that available in pip',
     long_description=long_description,
     long_description_content_type='text/markdown',
