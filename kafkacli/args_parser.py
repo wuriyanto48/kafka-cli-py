@@ -1,15 +1,21 @@
 import argparse
 
-from abc import ABC, abstractmethod
+from kafkacli.parser import (
+    Parser,
+)
 
+'''
+__version__
+'''
 __version__ = '1.0.0'
 
-class Parser(ABC):
+PUBLISH_COMMAND = 'pub'
+SUBSCRIBE_COMMAND = 'sub'
+CLIENT_ID = 'kafka-cli-py'
 
-    @abstractmethod
-    def parse(self):
-        pass
-
+'''
+ArgsParser a class represent flag and argument
+'''
 class ArgsParser(Parser):
     def __init__(self):
 
@@ -23,10 +29,10 @@ class ArgsParser(Parser):
         self.main_parser.add_argument('--version', action='version')
         self.main_parser.add_argument('-v', action='version')
         
-        sub_parser = self.main_parser.add_subparsers()
+        sub_parser = self.main_parser.add_subparsers(dest='sub_command')
 
-        publish_parser = sub_parser.add_parser(name='pub', help='publish message to one or more brokers')
-        subscribe_parser = sub_parser.add_parser(name='sub', help='subscribe to one or more brokers with specific topic')
+        publish_parser = sub_parser.add_parser(name=PUBLISH_COMMAND, help='publish message to one or more brokers')
+        subscribe_parser = sub_parser.add_parser(name=SUBSCRIBE_COMMAND, help='subscribe to one or more brokers with specific topic')
 
         '''
         publish_parser arguments
@@ -95,15 +101,23 @@ class ArgsParser(Parser):
             help='kafka-cli with verbose mode'
         )
 
+        self.command: str = None
         self.brokers: list = None
         self.topic: str = None
         self.message: str = None
         self.verbose: bool = False
     
+    '''
+    parse will parse
+    command line flag and arguments
+    '''
     def parse(self):
         args = self.main_parser.parse_args()
+        self.command = args.sub_command
+        
+        if args.sub_command == PUBLISH_COMMAND:
+            self.message = args.message.strip()
 
         self.brokers = args.brokers.split(',')
         self.topic = args.topic.strip()
-        self.message = args.message.strip()
         self.verbose = args.V
