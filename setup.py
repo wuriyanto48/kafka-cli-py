@@ -33,7 +33,7 @@ setup(
     keywords='kafka, cli, kafka cli, command line interface',
     packages=find_packages(exclude=['tests*']),
     python_requires='>=3.5',
-    scripts=['bin/kafka-cli-py-cli'],
+    scripts=['bin/kafka-cli'],
     project_urls={
         'Bug Reports': 'https://github.com/wuriyanto48/kafka-cli-py/issues',
         'Source': 'https://github.com/wuriyanto48/kafka-cli-py/',
