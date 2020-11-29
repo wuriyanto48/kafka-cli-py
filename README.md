@@ -1,6 +1,8 @@
 # kafka-cli-py
 
-Kafka CLI tools written in <b>Python</b> for `publish` and `subscribe` message from <b>Apache Kafka</b>
+Kafka CLI tools written in <b>Python</b> for `publish` and `subscribe` message from <b>Apache Kafka</b>.
+
+Similiar tools that i build with `Golang` https://github.com/musobarlab/kafka-cli.
 
 ### Install
 
