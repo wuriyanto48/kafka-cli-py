@@ -8,7 +8,7 @@ A similiar tool that i built with `Golang` https://github.com/musobarlab/kafka-c
 
 Manual install
 ```shell
-$ git clone 
+$ git clone https://github.com/wuriyanto48/kafka-cli-py.git
 $ pip install -r requirements.txt
 $ python setup.py install
 ```
