@@ -1,14 +1,17 @@
+from kafkacli.logger import logger as log
+
 from abc import (
     ABC, 
     abstractmethod
 )
 
-from kafka import (
-    KafkaProducer
+from confluent_kafka import (
+    Producer,
 )
 
 from kafkacli.args_parser import (
     CLIENT_ID,
+    GROUP_ID,
 )
 
 PUBLISHER_TIMEOUT = 3
@@ -29,20 +32,25 @@ class Publisher(ABC):
 class KPublisher(Publisher):
 
     def __init__(self, brokers: list):
-        self.kafka_producer = KafkaProducer(
-            client_id=CLIENT_ID,
-            bootstrap_servers=brokers, 
-            api_version=(0, 10),
-            request_timeout_ms=3000,
-        )
+        config = {
+            'bootstrap.servers': ','.join(brokers),
+            'client.id': CLIENT_ID,
+            'group.id': GROUP_ID,
+        }
+        self.kafka_producer = Producer(config)
 
     def publish(self, topic: str, message):
         if isinstance(message, str):
             message = bytes(message, encoding='utf-8')
 
-        self.kafka_producer.send(topic, value=message)
+        def on_delivery(err, msg):
+            if err is not None:
+                log.info('Failed to deliver message: %s: %s' % (str(msg), str(err)))
+            else:
+                log.info('Message produced: %s' % (str(msg)))
+
+        self.kafka_producer.produce(topic, value=message, on_delivery=on_delivery)
         self.kafka_producer.flush(PUBLISHER_TIMEOUT)
     
     def close(self):
-        if self.kafka_producer is not None:
-            self.kafka_producer.close()
+        pass

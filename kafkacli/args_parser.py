@@ -12,6 +12,7 @@ __version__ = '1.0.0'
 PUBLISH_COMMAND = 'pub'
 SUBSCRIBE_COMMAND = 'sub'
 CLIENT_ID = 'kafka-cli-py'
+GROUP_ID = 'kafka-cli-py-group'
 
 '''
 ArgsParser a class represent flag and argument

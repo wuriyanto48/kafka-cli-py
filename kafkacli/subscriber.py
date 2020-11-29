@@ -6,8 +6,8 @@ from abc import (
     abstractmethod
 )
 
-from kafka import (
-    KafkaConsumer
+from confluent_kafka import (
+    Consumer,
 )
 
 from kafkacli.killer import (
@@ -15,7 +15,8 @@ from kafkacli.killer import (
 )
 
 from kafkacli.args_parser import (
-    CLIENT_ID, 
+    CLIENT_ID,
+    GROUP_ID,
 )
 
 '''
@@ -38,23 +39,37 @@ class KSubscriber(Subscriber, threading.Thread):
             name='kafka subscriber thread', daemon=True)
         self.killer = killer
         self.topic = topic
-        self.kafka_subscriber = KafkaConsumer(
-            client_id=CLIENT_ID,
-            auto_offset_reset='earliest',
-            bootstrap_servers=brokers, 
-            api_version=(0, 10),
-        )
+        
+        config = {
+            'bootstrap.servers': ','.join(brokers),
+            'client.id': CLIENT_ID,
+            'group.id': GROUP_ID,
+            'auto.offset.reset': 'earliest'
+        }
+
+        self.kafka_subscriber = Consumer(config)
     
     def subscribe(self, topic):
-        self.kafka_subscriber.subscribe([topic])
+        def on_assign(consumer, partitions):
+            log.info('subscribed')
+        self.kafka_subscriber.subscribe([topic], on_assign=on_assign)
+
         while True:
+            message = self.kafka_subscriber.poll(timeout=1.0)
             if self.killer.killed:
-                print('fucked')
-                print(self.killer.killed)
                 break
-            # for message in self.kafka_subscriber:
-            #     log.info('received message from topic {t}'.format(t=message.topic))
-            #     print(message.value.decode('utf-8'))
+            
+            if message is None:
+                continue
+
+            if message.error():
+                log.error('read message error')
+            
+            # commit message
+            self.kafka_subscriber.commit(asynchronous=False)
+
+            log.info('received message from topic {t}'.format(t=message.topic()))
+            print(message.value().decode('utf-8'))
         
         self.close()
 
