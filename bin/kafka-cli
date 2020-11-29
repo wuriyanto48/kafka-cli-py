@@ -1,1 +1,24 @@
 #!/usr/bin/env python
+
+from kafkacli import (
+    ArgsParser, 
+    Killer,
+    K,
+)
+
+def main():
+    arg_parser = ArgsParser()
+    arg_parser.parse()
+
+    print(arg_parser.command)
+    print(arg_parser.brokers)
+    print(arg_parser.topic)
+    print(arg_parser.message)
+    print(arg_parser.verbose)
+
+    killer = Killer()
+    k = K(arg_parser, killer)
+    k.run()
+
+if __name__ == '__main__':
+    main()
