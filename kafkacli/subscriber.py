@@ -15,7 +15,7 @@ from kafkacli.killer import (
 )
 
 from kafkacli.args_parser import (
-    CLIENT_ID,
+    CLIENT_ID, 
 )
 
 '''
@@ -47,9 +47,14 @@ class KSubscriber(Subscriber, threading.Thread):
     
     def subscribe(self, topic):
         self.kafka_subscriber.subscribe([topic])
-        while not self.killer.killed:
-            for message in self.kafka_subscriber:
-                log.info('received message from topic {t}: {m}'.format(t=message.topic, m=message.value))
+        while True:
+            if self.killer.killed:
+                print('fucked')
+                print(self.killer.killed)
+                break
+            # for message in self.kafka_subscriber:
+            #     log.info('received message from topic {t}'.format(t=message.topic))
+            #     print(message.value.decode('utf-8'))
         
         self.close()
 
@@ -57,6 +62,6 @@ class KSubscriber(Subscriber, threading.Thread):
         log.info('start kafka subscriber inside thread {tn}'.format(tn=self.name))
         self.subscribe(self.topic)
     
-    def close():
+    def close(self):
         if self.kafka_subscriber is not None:
             self.kafka_subscriber.close()
