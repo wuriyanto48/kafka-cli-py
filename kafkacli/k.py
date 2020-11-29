@@ -42,5 +42,4 @@ class K:
             subscriber.start()
             subscriber.join()
         else:
-            print('invalid command')
-            sys.exit(-1)
+            return

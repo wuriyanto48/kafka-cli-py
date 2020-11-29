@@ -32,8 +32,15 @@ class ArgsParser(Parser):
         
         sub_parser = self.main_parser.add_subparsers(dest='sub_command')
 
-        publish_parser = sub_parser.add_parser(name=PUBLISH_COMMAND, help='publish message to one or more brokers')
-        subscribe_parser = sub_parser.add_parser(name=SUBSCRIBE_COMMAND, help='subscribe to one or more brokers with specific topic')
+        publish_parser = sub_parser.add_parser(
+            name=PUBLISH_COMMAND, 
+            help='kafka-cli sub --brokers localhost:9092 --topic topbanget1'
+        )
+
+        subscribe_parser = sub_parser.add_parser(
+            name=SUBSCRIBE_COMMAND, 
+            help='kafka-cli pub --brokers localhost:9092 --topic topbanget1 --message "hello world"'
+        )
 
         '''
         publish_parser arguments
@@ -118,7 +125,12 @@ class ArgsParser(Parser):
         
         if args.sub_command == PUBLISH_COMMAND:
             self.message = args.message.strip()
-
-        self.brokers = args.brokers.split(',')
-        self.topic = args.topic.strip()
-        self.verbose = args.V
+            self.brokers = args.brokers.split(',')
+            self.topic = args.topic.strip()
+            self.verbose = args.V
+        elif args.sub_command == SUBSCRIBE_COMMAND:
+            self.brokers = args.brokers.split(',')
+            self.topic = args.topic.strip()
+            self.verbose = args.V
+        else:
+            self.main_parser.print_help()
