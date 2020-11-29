@@ -7,3 +7,5 @@ build/
 *.egg*
 
 *.yml
+
+main.py
