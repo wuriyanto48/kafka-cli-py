@@ -8,4 +8,6 @@ build/
 
 *.yml
 
+*.txt
+
 main.py
