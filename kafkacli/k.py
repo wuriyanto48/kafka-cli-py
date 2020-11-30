@@ -1,4 +1,9 @@
 import sys
+
+from kafkacli.admin import (
+    Admin,
+)
+
 from kafkacli.publisher import (
     KPublisher,
 )
@@ -9,6 +14,7 @@ from kafkacli.subscriber import (
 
 from kafkacli.args_parser import (
     ArgsParser, 
+    ADMIN_COMMAND,
     PUBLISH_COMMAND,
     SUBSCRIBE_COMMAND,
 )
@@ -23,7 +29,11 @@ class K:
         self.killer = killer
     
     def run(self):
-        if self.arg_parser.command == PUBLISH_COMMAND:
+        if self.arg_parser.command == ADMIN_COMMAND:
+            brokers = self.arg_parser.brokers
+            admin = Admin(self.arg_parser)
+            admin.run()
+        elif self.arg_parser.command == PUBLISH_COMMAND:
             brokers = self.arg_parser.brokers
             topic = self.arg_parser.topic
             message = self.arg_parser.message

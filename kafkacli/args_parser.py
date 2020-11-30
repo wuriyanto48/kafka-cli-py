@@ -9,6 +9,11 @@ __version__
 '''
 __version__ = '1.0.0'
 
+ADMIN_COMMAND = 'adm'
+ADMIN_LIST_TOPIC_COMMAND = 'list-topic'
+ADMIN_CREATE_TOPIC_COMMAND = 'create-topic'
+ADMIN_DELETE_TOPIC_COMMAND = 'delete-topic'
+
 PUBLISH_COMMAND = 'pub'
 SUBSCRIBE_COMMAND = 'sub'
 CLIENT_ID = 'kafka-cli-py'
@@ -32,6 +37,64 @@ class ArgsParser(Parser):
         
         sub_parser = self.main_parser.add_subparsers(dest='sub_command')
 
+        '''
+        admin_parser arguments
+        '''
+        self.admin_parser = sub_parser.add_parser(
+            name=ADMIN_COMMAND,
+            help='kafka-cli adm sub-command --brokers localhost:9092'
+        )
+
+        admin_sub_parser = self.admin_parser.add_subparsers(dest='admin_sub_command')
+
+        admin_list_topic_parser = admin_sub_parser.add_parser(
+            name=ADMIN_LIST_TOPIC_COMMAND,
+            help='kafka-cli adm list-topic --brokers localhost:9092'
+        )
+
+        admin_create_topic_parser = admin_sub_parser.add_parser(
+            name=ADMIN_CREATE_TOPIC_COMMAND,
+            help='kafka-cli adm create-topic --brokers localhost:9092 --topic newtopic --partition 3'
+        )
+        
+        admin_list_topic_parser.add_argument(
+            '--brokers', 
+            type=str, 
+            default='localhost:9092', 
+            help='list or single of kafka brokers, separate with ",". Ex: "localhost:9091,localhost:9092"', 
+            required=True
+        )
+
+        admin_create_topic_parser.add_argument(
+            '--brokers', 
+            type=str, 
+            default='localhost:9092', 
+            help='list or single of kafka brokers, separate with ",". Ex: "localhost:9091,localhost:9092"', 
+            required=True
+        )
+
+        admin_create_topic_parser.add_argument(
+            '--topic', 
+            type=str,
+            help='topic name', 
+            required=True
+        )
+
+        admin_create_topic_parser.add_argument(
+            '--partition', 
+            type=int,
+            default=1,
+            help='how many partition you need'
+        )
+
+        admin_create_topic_parser.add_argument(
+            '--replication', 
+            type=int,
+            default=1,
+            help='how many replication factor you need',
+        )
+
+        # ------------------------------------------------------------------------------------------------
         publish_parser = sub_parser.add_parser(
             name=PUBLISH_COMMAND, 
             help='kafka-cli sub --brokers localhost:9092 --topic topbanget1'
@@ -114,6 +177,8 @@ class ArgsParser(Parser):
         self.topic: str = None
         self.message: str = None
         self.verbose: bool = False
+        self.partition: int = 1
+        self.replication_factor: int = 1
     
     '''
     parse will parse
@@ -123,7 +188,20 @@ class ArgsParser(Parser):
         args = self.main_parser.parse_args()
         self.command = args.sub_command
         
-        if args.sub_command == PUBLISH_COMMAND:
+        if args.sub_command == ADMIN_COMMAND:
+            self.admin_sub_command = args.admin_sub_command
+            if args.admin_sub_command == ADMIN_LIST_TOPIC_COMMAND:
+                self.brokers = args.brokers.split(',')
+            elif args.admin_sub_command == ADMIN_CREATE_TOPIC_COMMAND:
+                self.brokers = args.brokers.split(',')
+                self.topic = args.topic.strip()
+                self.partition = args.partition
+                self.replication_factor = args.replication
+            elif args.admin_sub_command == ADMIN_DELETE_TOPIC_COMMAND:
+                pass
+            else:
+                self.admin_parser.print_help()
+        elif args.sub_command == PUBLISH_COMMAND:
             self.message = args.message.strip()
             self.brokers = args.brokers.split(',')
             self.topic = args.topic.strip()
