@@ -29,3 +29,15 @@ Subscribe and get Message from Kafka
 ```shell
 $ kafka-cli sub --brokers localhost:9092 --topic topbanget1
 ```
+
+Multiple `brokers`
+```shell
+$ kafka-cli sub --brokers localhost:9092,localhost:9093,localhost:9094 --topic topbanget1
+```
+
+With `auth mechanism`, you need to provide `--auth` flag to prompt username and password
+```shell
+$ kafka-cli sub --brokers localhost:9092,localhost:9093,localhost:9094 --topic topbanget1 --auth
+$ username: admin
+$ password: adminpass
+```
