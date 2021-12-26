@@ -67,6 +67,18 @@ class ArgsParser(Parser):
             required=True
         )
 
+        '''
+        auth command
+        '''
+        admin_list_topic_parser.add_argument(
+            '--auth', 
+            type=bool, 
+            const=True,
+            default=False,
+            nargs='?',
+            help='kafka-cli with auth mode'
+        )
+
         admin_create_topic_parser.add_argument(
             '--brokers', 
             type=str, 
@@ -94,6 +106,18 @@ class ArgsParser(Parser):
             type=int,
             default=1,
             help='how many replication factor you need',
+        )
+
+        '''
+        auth command
+        '''
+        admin_create_topic_parser.add_argument(
+            '--auth', 
+            type=bool, 
+            const=True,
+            default=False,
+            nargs='?',
+            help='kafka-cli with auth mode'
         )
 
         # ------------------------------------------------------------------------------------------------
@@ -221,11 +245,43 @@ class ArgsParser(Parser):
             self.admin_sub_command = args.admin_sub_command
             if args.admin_sub_command == ADMIN_LIST_TOPIC_COMMAND:
                 self.brokers = args.brokers.split(',')
+                if args.auth:
+                    auth_fields = ['username: ', 'password: ']
+                    responses = []
+                    for f in auth_fields:
+                        try:
+                            response = input(f)
+                            if len(response) <= 0:
+                                log.info('invalid input %s' % f)
+                            else:
+                                responses.append(response)
+                        except ValueError as e:
+                            log.info('invalid input')
+                    if len(responses) > 0:
+                        self.username = responses[0]
+                        self.password = responses[1]
+                        self.auth = True
             elif args.admin_sub_command == ADMIN_CREATE_TOPIC_COMMAND:
                 self.brokers = args.brokers.split(',')
                 self.topic = args.topic.strip()
                 self.partition = args.partition
                 self.replication_factor = args.replication
+                if args.auth:
+                    auth_fields = ['username: ', 'password: ']
+                    responses = []
+                    for f in auth_fields:
+                        try:
+                            response = input(f)
+                            if len(response) <= 0:
+                                log.info('invalid input %s' % f)
+                            else:
+                                responses.append(response)
+                        except ValueError as e:
+                            log.info('invalid input')
+                    if len(responses) > 0:
+                        self.username = responses[0]
+                        self.password = responses[1]
+                        self.auth = True
             elif args.admin_sub_command == ADMIN_DELETE_TOPIC_COMMAND:
                 pass
             else:

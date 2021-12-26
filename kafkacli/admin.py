@@ -19,12 +19,28 @@ class Admin:
             'client.id': CLIENT_ID,
         }
 
+        if args.auth:
+            config.update({
+                'security.protocol': 'SASL_PLAINTEXT',
+                'sasl.mechanism': 'PLAIN',
+                'sasl.username': args.username,
+                'sasl.password': args.password
+            })
+
         self.admin_client = AdminClient(conf=config)
     
     def _get_topics(self):
-        metadata = self.admin_client.list_topics()
+        metadata = self.admin_client.list_topics(timeout=10)
         topics: dict = metadata.topics
 
+        print()
+        print('---Brokers List---')
+        brokers: dict = metadata.brokers
+        for key, val in brokers.items():
+            print(key, val)
+            # print('broker name : {bn}'.format(bn=key))
+
+        print()
         print('---Topic List---')
         for key, val in topics.items():
             # print(val.partitions)
