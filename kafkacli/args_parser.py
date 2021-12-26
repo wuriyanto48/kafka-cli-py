@@ -4,6 +4,8 @@ from kafkacli.parser import (
     Parser,
 )
 
+from kafkacli.logger import logger as log
+
 '''
 __version__
 '''
@@ -143,6 +145,18 @@ class ArgsParser(Parser):
         )
 
         '''
+        auth command
+        '''
+        publish_parser.add_argument(
+            '--auth', 
+            type=bool, 
+            const=True,
+            default=False,
+            nargs='?',
+            help='kafka-cli with auth mode'
+        )
+
+        '''
         subscribe_parser arguments
         '''
         subscribe_parser.add_argument(
@@ -172,6 +186,18 @@ class ArgsParser(Parser):
             help='kafka-cli with verbose mode'
         )
 
+        '''
+        auth command
+        '''
+        subscribe_parser.add_argument(
+            '--auth', 
+            type=bool, 
+            const=True,
+            default=False,
+            nargs='?',
+            help='kafka-cli with auth mode'
+        )
+
         self.command: str = None
         self.brokers: list = None
         self.topic: str = None
@@ -179,6 +205,9 @@ class ArgsParser(Parser):
         self.verbose: bool = False
         self.partition: int = 1
         self.replication_factor: int = 1
+        self.auth: bool = False
+        self.username: str = None
+        self.password: str = None
     
     '''
     parse will parse
@@ -206,9 +235,43 @@ class ArgsParser(Parser):
             self.brokers = args.brokers.split(',')
             self.topic = args.topic.strip()
             self.verbose = args.V
+
+            if args.auth:
+                auth_fields = ['username: ', 'password: ']
+                responses = []
+                for f in auth_fields:
+                    try:
+                        response = input(f)
+                        if len(response) <= 0:
+                            log.info('invalid input %s' % f)
+                        else:
+                            responses.append(response)
+                    except ValueError as e:
+                        log.info('invalid input')
+                if len(responses) > 0:
+                    self.username = responses[0]
+                    self.password = responses[1]
+                    self.auth = True
         elif args.sub_command == SUBSCRIBE_COMMAND:
             self.brokers = args.brokers.split(',')
             self.topic = args.topic.strip()
             self.verbose = args.V
+
+            if args.auth:
+                auth_fields = ['username: ', 'password: ']
+                responses = []
+                for f in auth_fields:
+                    try:
+                        response = input(f)
+                        if len(response) <= 0:
+                            log.info('invalid input %s' % f)
+                        else:
+                            responses.append(response)
+                    except ValueError as e:
+                        log.info('invalid input')
+                if len(responses) > 0:
+                    self.username = responses[0]
+                    self.password = responses[1]
+                    self.auth = True
         else:
             self.main_parser.print_help()

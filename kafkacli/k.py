@@ -30,14 +30,12 @@ class K:
     
     def run(self):
         if self.arg_parser.command == ADMIN_COMMAND:
-            brokers = self.arg_parser.brokers
             admin = Admin(self.arg_parser)
             admin.run()
         elif self.arg_parser.command == PUBLISH_COMMAND:
-            brokers = self.arg_parser.brokers
             topic = self.arg_parser.topic
             message = self.arg_parser.message
-            publisher = KPublisher(brokers)
+            publisher = KPublisher(self.arg_parser)
 
             # send message to kafka
             publisher.publish(topic=topic, message=message)
@@ -45,10 +43,8 @@ class K:
             # close connection
             publisher.close()
         elif self.arg_parser.command == SUBSCRIBE_COMMAND:
-            brokers = self.arg_parser.brokers
-            topic = self.arg_parser.topic
 
-            subscriber = KSubscriber(brokers, killer=self.killer, topic=topic)
+            subscriber = KSubscriber(self.arg_parser, killer=self.killer)
             subscriber.start()
             subscriber.join()
         else:

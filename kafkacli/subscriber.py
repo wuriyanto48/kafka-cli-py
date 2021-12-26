@@ -15,6 +15,7 @@ from kafkacli.killer import (
 )
 
 from kafkacli.args_parser import (
+    ArgsParser,
     CLIENT_ID,
     GROUP_ID,
 )
@@ -34,42 +35,54 @@ class Subscriber(ABC):
 
 class KSubscriber(Subscriber, threading.Thread):
 
-    def __init__(self, brokers: list, killer: Killer, topic: str = None):
+    def __init__(self, arg_parser: ArgsParser, killer: Killer):
         threading.Thread.__init__(self, 
             name='kafka subscriber thread', daemon=True)
         self.killer = killer
-        self.topic = topic
+        self.topic = arg_parser.topic
         
         config = {
-            'bootstrap.servers': ','.join(brokers),
+            'bootstrap.servers': ','.join(arg_parser.brokers),
             'client.id': CLIENT_ID,
             'group.id': GROUP_ID,
             'auto.offset.reset': 'earliest'
         }
+
+        if arg_parser.auth:
+            config.update({
+                'security.protocol': 'SASL_PLAINTEXT',
+                'sasl.mechanism': 'PLAIN',
+                'sasl.username': arg_parser.username,
+                'sasl.password': arg_parser.password
+            })
 
         self.kafka_subscriber = Consumer(config)
     
     def subscribe(self, topic):
         def on_assign(consumer, partitions):
             log.info('subscribed')
-        self.kafka_subscriber.subscribe([topic], on_assign=on_assign)
 
-        while True:
-            message = self.kafka_subscriber.poll(timeout=1.0)
-            if self.killer.killed:
-                break
+        try:
+            self.kafka_subscriber.subscribe([topic], on_assign=on_assign)
             
-            if message is None:
-                continue
+            while True:
+                message = self.kafka_subscriber.poll(timeout=1.0)
+                if self.killer.killed:
+                    break
+                
+                if message is None:
+                    continue
 
-            if message.error():
-                log.error('read message error')
-            
-            # commit message
-            self.kafka_subscriber.commit(asynchronous=False)
+                if message.error():
+                    log.error('read message error')
+                
+                # commit message
+                self.kafka_subscriber.commit(asynchronous=False)
 
-            log.info('received message from topic {t}'.format(t=message.topic()))
-            print(message.value().decode('utf-8'))
+                log.info('received message from topic {t}'.format(t=message.topic()))
+                print(message.value().decode('utf-8'))
+        except:
+            log.error('error subscribing to brokers')
         
         self.close()
 
