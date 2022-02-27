@@ -6,8 +6,6 @@ build/
 
 *.egg*
 
-*.yml
-
 *.txt
 
 main.py
