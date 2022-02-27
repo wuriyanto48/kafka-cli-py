@@ -1,4 +1,5 @@
 import argparse
+import sys
 
 from kafkacli.parser import (
     Parser,
@@ -15,6 +16,7 @@ ADMIN_COMMAND = 'adm'
 ADMIN_LIST_TOPIC_COMMAND = 'list-topic'
 ADMIN_CREATE_TOPIC_COMMAND = 'create-topic'
 ADMIN_DELETE_TOPIC_COMMAND = 'delete-topic'
+ADMIN_ADD_PARTITION = 'add-partition'
 
 PUBLISH_COMMAND = 'pub'
 SUBSCRIBE_COMMAND = 'sub'
@@ -58,6 +60,11 @@ class ArgsParser(Parser):
             name=ADMIN_CREATE_TOPIC_COMMAND,
             help='kafka-cli adm create-topic --brokers localhost:9092 --topic newtopic --partition 3'
         )
+
+        admin_add_partition_parser = admin_sub_parser.add_parser(
+            name=ADMIN_ADD_PARTITION,
+            help='kafka-cli adm add-partition --brokers localhost:9092 --topic existing_topic --partition 3'
+        )
         
         admin_list_topic_parser.add_argument(
             '--brokers', 
@@ -79,6 +86,43 @@ class ArgsParser(Parser):
             help='kafka-cli with auth mode'
         )
 
+        # ------------------------------------------------------------------------------------------------
+
+        admin_add_partition_parser.add_argument(
+            '--brokers', 
+            type=str, 
+            default='localhost:9092', 
+            help='list or single of kafka brokers, separate with ",". Ex: "localhost:9091,localhost:9092"', 
+            required=True
+        )
+
+        admin_add_partition_parser.add_argument(
+            '--topic', 
+            type=str,
+            help='topic name', 
+            required=True
+        )
+
+        admin_add_partition_parser.add_argument(
+            '--partition', 
+            type=int,
+            default=1,
+            help='how many partition you need to add'
+        )
+
+        '''
+        auth command
+        '''
+        admin_add_partition_parser.add_argument(
+            '--auth', 
+            type=bool, 
+            const=True,
+            default=False,
+            nargs='?',
+            help='kafka-cli with auth mode'
+        )
+
+        # ------------------------------------------------------------------------------------------------
         admin_create_topic_parser.add_argument(
             '--brokers', 
             type=str, 
@@ -282,10 +326,31 @@ class ArgsParser(Parser):
                         self.username = responses[0]
                         self.password = responses[1]
                         self.auth = True
+            elif args.admin_sub_command == ADMIN_ADD_PARTITION:
+                self.brokers = args.brokers.split(',')
+                self.topic = args.topic.strip()
+                self.partition = args.partition
+                if args.auth:
+                    auth_fields = ['username: ', 'password: ']
+                    responses = []
+                    for f in auth_fields:
+                        try:
+                            response = input(f)
+                            if len(response) <= 0:
+                                log.info('invalid input %s' % f)
+                            else:
+                                responses.append(response)
+                        except ValueError as e:
+                            log.info('invalid input')
+                    if len(responses) > 0:
+                        self.username = responses[0]
+                        self.password = responses[1]
+                        self.auth = True
             elif args.admin_sub_command == ADMIN_DELETE_TOPIC_COMMAND:
                 pass
             else:
                 self.admin_parser.print_help()
+                sys.exit(1)
         elif args.sub_command == PUBLISH_COMMAND:
             self.message = args.message.strip()
             self.brokers = args.brokers.split(',')
@@ -331,3 +396,4 @@ class ArgsParser(Parser):
                     self.auth = True
         else:
             self.main_parser.print_help()
+            sys.exit(1)
