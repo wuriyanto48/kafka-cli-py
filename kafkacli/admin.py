@@ -28,8 +28,6 @@ class Admin:
                 'sasl.username': args.username,
                 'sasl.password': args.password
             })
-        
-        print(config)
 
         self.admin_client = AdminClient(conf=config)
     
