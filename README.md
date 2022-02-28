@@ -19,13 +19,13 @@ See available options
 $ kafka-cli -h
 ```
 
-Publish Message to Kafka
+#### Publish Message to Kafka
 ```shell
 $ kafka-cli pub --brokers localhost:9092 --topic topbanget1 --message "hello world"
 $ kafka-cli pub --brokers localhost:9092 --topic topbanget1 --message '{"header":"JSON","content":"this is JSON message"}'
 ```
 
-Subscribe and get Message from Kafka
+#### Subscribe and get Message from Kafka
 ```shell
 $ kafka-cli sub --brokers localhost:9092 --topic topbanget1
 ```
@@ -33,6 +33,26 @@ $ kafka-cli sub --brokers localhost:9092 --topic topbanget1
 Multiple `brokers`
 ```shell
 $ kafka-cli sub --brokers localhost:9092,localhost:9093,localhost:9094 --topic topbanget1
+```
+
+#### Show all topic
+```shell
+kafka-cli adm list-topic --brokers localhost:9092,localhost:9093,localhost:9094 --auth
+```
+
+#### Create new topic
+```shell
+$ kafka-cli adm create-topic --brokers localhost:9092,localhost:9093,localhost:9094 --topic topbanget1 --partition 3 --replication 3 --auth
+```
+
+#### Delete topic
+```shell
+$ kafka-cli adm delete-topic --brokers localhost:9092,localhost:9093,localhost:9094 --topic topic_name_to_delete --auth
+```
+
+#### Add partition to topic
+```shell
+$ kafka-cli adm add-partition --brokers localhost:9092,localhost:9093,localhost:9094 --topic existing_topic_name --partition 3 --auth
 ```
 
 With `auth mechanism`, you need to provide `--auth` flag to prompt username and password
