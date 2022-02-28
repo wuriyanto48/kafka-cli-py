@@ -35,6 +35,15 @@ Multiple `brokers`
 $ kafka-cli sub --brokers localhost:9092,localhost:9093,localhost:9094 --topic topbanget1
 ```
 
+With `auth mechanism`, you need to provide `--auth` flag to prompt username and password
+```shell
+$ kafka-cli sub --brokers localhost:9092,localhost:9093,localhost:9094 --topic topbanget1 --auth
+$ username: admin
+$ password: adminpass
+```
+
+#
+
 #### Show all topic
 ```shell
 kafka-cli adm list-topic --brokers localhost:9092,localhost:9093,localhost:9094 --auth
@@ -53,11 +62,4 @@ $ kafka-cli adm delete-topic --brokers localhost:9092,localhost:9093,localhost:9
 #### Add partition to topic
 ```shell
 $ kafka-cli adm add-partition --brokers localhost:9092,localhost:9093,localhost:9094 --topic existing_topic_name --partition 3 --auth
-```
-
-With `auth mechanism`, you need to provide `--auth` flag to prompt username and password
-```shell
-$ kafka-cli sub --brokers localhost:9092,localhost:9093,localhost:9094 --topic topbanget1 --auth
-$ username: admin
-$ password: adminpass
 ```
