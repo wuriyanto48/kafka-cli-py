@@ -57,7 +57,11 @@ class Admin:
         res = self.admin_client.create_topics([new_topic])
         print('---New Created Topics---')
         for key, val in res.items():
-            print('topic name : {tn}'.format(tn=key))
+            try:
+                val.result()
+                print('topic name : {tn}'.format(tn=key))
+            except Exception as e:
+                print("failed to create new topic {}: {}".format(key, e))
     
     def _create_partition(self):
         topic = self.args.topic
@@ -71,16 +75,29 @@ class Admin:
                 val.result()  # The result itself is None
                 print("new additional partitions created for topic {}".format(key))
             except Exception as e:
-                print("faailed to add new additional partitions to topic {}: {}".format(key, e))
+                print("failed to add new additional partitions to topic {}: {}".format(key, e))
 
     def _delete_topic(self):
-        pass
+        topic = self.args.topic
+
+        res = self.admin_client.delete_topics([topic])
+
+        print('---Deleted Topics---')
+        # Wait for operation to finish.
+        for key, val in res.items():
+            try:
+                val.result()  # The result itself is None
+                print("topic {} deleted".format(key))
+            except Exception as e:
+                print("failed to delete topic {}: {}".format(key, e))
     
     def run(self):
         if self.args.admin_sub_command == ADMIN_LIST_TOPIC_COMMAND:
             self._get_topics()
         elif self.args.admin_sub_command == ADMIN_CREATE_TOPIC_COMMAND:
             self._create_topic()
+        elif self.args.admin_sub_command == ADMIN_DELETE_TOPIC_COMMAND:
+            self._delete_topic()
         elif self.args.admin_sub_command == ADMIN_ADD_PARTITION:
             self._create_partition()
         else:

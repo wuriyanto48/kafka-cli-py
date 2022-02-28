@@ -58,7 +58,12 @@ class ArgsParser(Parser):
 
         admin_create_topic_parser = admin_sub_parser.add_parser(
             name=ADMIN_CREATE_TOPIC_COMMAND,
-            help='kafka-cli adm create-topic --brokers localhost:9092 --topic newtopic --partition 3'
+            help='kafka-cli adm create-topic --brokers localhost:9092 --topic newtopic --partition 3 --replication 2'
+        )
+
+        admin_delete_topic_parser = admin_sub_parser.add_parser(
+            name=ADMIN_DELETE_TOPIC_COMMAND,
+            help='kafka-cli adm delete-topic --brokers localhost:9092 --topic topic_to_delete'
         )
 
         admin_add_partition_parser = admin_sub_parser.add_parser(
@@ -114,6 +119,35 @@ class ArgsParser(Parser):
         auth command
         '''
         admin_add_partition_parser.add_argument(
+            '--auth', 
+            type=bool, 
+            const=True,
+            default=False,
+            nargs='?',
+            help='kafka-cli with auth mode'
+        )
+
+        # ------------------------------------------------------------------------------------------------
+
+        admin_delete_topic_parser.add_argument(
+            '--brokers', 
+            type=str, 
+            default='localhost:9092', 
+            help='list or single of kafka brokers, separate with ",". Ex: "localhost:9091,localhost:9092"', 
+            required=True
+        )
+
+        admin_delete_topic_parser.add_argument(
+            '--topic', 
+            type=str,
+            help='topic name', 
+            required=True
+        )
+
+        '''
+        auth command
+        '''
+        admin_delete_topic_parser.add_argument(
             '--auth', 
             type=bool, 
             const=True,
@@ -347,7 +381,24 @@ class ArgsParser(Parser):
                         self.password = responses[1]
                         self.auth = True
             elif args.admin_sub_command == ADMIN_DELETE_TOPIC_COMMAND:
-                pass
+                self.brokers = args.brokers.split(',')
+                self.topic = args.topic.strip()
+                if args.auth:
+                    auth_fields = ['username: ', 'password: ']
+                    responses = []
+                    for f in auth_fields:
+                        try:
+                            response = input(f)
+                            if len(response) <= 0:
+                                log.info('invalid input %s' % f)
+                            else:
+                                responses.append(response)
+                        except ValueError as e:
+                            log.info('invalid input')
+                    if len(responses) > 0:
+                        self.username = responses[0]
+                        self.password = responses[1]
+                        self.auth = True
             else:
                 self.admin_parser.print_help()
                 sys.exit(1)
